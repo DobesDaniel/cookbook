@@ -1274,10 +1274,12 @@ input {
   }
 
   .catalog-page .tag-picker {
-    align-self: flex-start;
+    width: 100%;
   }
 
   .catalog-page .tag-picker summary {
+    min-height: 37px;
+    justify-content: space-between;
     padding: 8px 12px;
   }
 
@@ -1290,6 +1292,7 @@ input {
     min-height: 0;
     flex: 1;
     padding: 68px 12px 10px;
+    --card-overlap: 70px !important;
   }
 
   .catalog-page .card-catalog.all-cards-fit {
@@ -1297,13 +1300,13 @@ input {
   }
 
   .catalog-page .recipe-card {
-    flex-basis: 230px;
-    height: 305px;
+    flex-basis: 235px;
+    height: clamp(320px, 43dvh, 350px);
     min-height: 0;
   }
 
   .catalog-page .recipe-card-link {
-    height: 305px;
+    height: 100%;
     padding: 18px;
   }
 
@@ -1313,7 +1316,7 @@ input {
 
   .catalog-page .recipe-card-image {
     width: calc(100% + 36px);
-    height: 102px;
+    height: clamp(105px, 14dvh, 120px);
     margin: -18px -18px 14px;
   }
 
