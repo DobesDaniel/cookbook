@@ -1291,12 +1291,12 @@ input {
   .catalog-page .card-catalog {
     min-height: 0;
     flex: 1;
-    padding: 68px 12px 10px;
+    padding: clamp(82px, 13dvh, 112px) 12px 10px;
     --card-overlap: 70px !important;
   }
 
   .catalog-page .card-catalog.all-cards-fit {
-    padding-top: 40px;
+    padding-top: clamp(66px, 10dvh, 88px);
   }
 
   .catalog-page .recipe-card {
