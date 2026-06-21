@@ -1,43 +1,47 @@
-# Astro Starter Kit: Minimal
+# Repertoár receptů
+
+Osobní dvojjazyčná kuchařka s recepty, které jsem vyzkoušel nebo upravil podle sebe.
+
+Web je dostupný na:
+
+**https://dobesdaniel.github.io/cookbook/**
+
+## Co web nabízí
+
+- českou a anglickou verzi,
+- vyhledávání receptů podle názvu,
+- filtrování pomocí více tagů,
+- kartotéku ovládanou myší i dotykem,
+- rychlý náhled a samostatnou stránku každého receptu,
+- formulář pro vytvoření nového Markdown receptu.
+
+## Spuštění na počítači
+
+Po stažení projektu otevři terminál v jeho hlavní složce a spusť:
 
 ```sh
-npm create astro@latest -- --template minimal
+npm install
+npm run dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Česká verze potom poběží na:
 
-## 🚀 Project Structure
+**http://localhost:4321/cookbook/cs/**
 
-Inside of your Astro project, you'll see the following folders and files:
+## Přidání receptu
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+1. Otevři na webu **Přidat recept**.
+2. Vyplň formulář a stáhni vytvořený soubor `.md`.
+3. Český recept vlož do `src/content/recipes/cs/`, anglický do `src/content/recipes/en/`.
+4. Obrázek vlož do `public/images/` a zkontroluj jeho cestu v receptu.
+5. Přeložené verze stejného receptu musí používat stejný `translationKey`.
+
+## Nasazení
+
+Po odeslání změn do větve `main` GitHub Actions web automaticky sestaví a nasadí na GitHub Pages.
+
+Ruční sestavení pro kontrolu lze spustit příkazem:
+
+```sh
+npm run build
 ```
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
