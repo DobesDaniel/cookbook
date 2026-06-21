@@ -1,0 +1,749 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { ui } from "../translations/ui.js";
+
+const { language } = Astro.props;
+const text = ui[language];
+
+const recipes = (await getCollection("recipes")).filter(
+  (recipe) => recipe.data.language === language,
+);
+
+const renderedRecipes = await Promise.all(
+  recipes.map(async (recipe) => ({
+    recipe,
+    Content: (await render(recipe)).Content,
+  })),
+);
+
+const recipeFolder = language === "cs" ? "recepty" : "recipes";
+const baseUrl = import.meta.env.BASE_URL;
+const languageUrls = {
+  cs: `${baseUrl}cs/`,
+  en: `${baseUrl}en/`,
+};
+const imageUrl = (path) => `${baseUrl}${path.replace(/^\//, "")}`;
+const cardOverlap =
+  recipes.length <= 3 ? 50 : recipes.length <= 6 ? 100 : 150;
+const availableTags = [
+  ...new Set(recipes.flatMap((recipe) => recipe.data.tags)),
+].sort((a, b) => a.localeCompare(b, language));
+---
+
+<BaseLayout
+  language={language}
+  title={`${text.heading} | ${text.siteName}`}
+  description={text.introduction}
+  bodyClass="catalog-page"
+  languageUrls={languageUrls}
+>
+  <section class="hero">
+    <h1>{text.heading}</h1>
+    <p>{text.introduction}</p>
+  </section>
+
+  <section class="catalog-section">
+    <h2 class="visually-hidden">{text.recipesHeading}</h2>
+
+    <div class="catalog-controls">
+      <label class="recipe-search">
+        <span aria-hidden="true">⌕</span>
+        <input
+          type="search"
+          placeholder={text.searchPlaceholder}
+          aria-label={text.searchPlaceholder}
+          data-recipe-search
+        />
+      </label>
+
+      <details class="tag-picker" data-filter-picker>
+        <summary>
+          <span>{text.filters}</span>
+          <span class="filter-count" data-filter-count hidden>0</span>
+        </summary>
+
+        <div class="tag-filter-menu" aria-label={text.allTags}>
+          <button
+            class="tag-filter is-active"
+            type="button"
+            data-filter-tag=""
+            aria-pressed="true"
+          >
+            {text.allTags}
+          </button>
+
+          {availableTags.map((tag) => (
+            <button
+              class="tag-filter"
+              type="button"
+              data-filter-tag={tag}
+              aria-pressed="false"
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      </details>
+    </div>
+
+    <div
+      class="card-catalog"
+      aria-label={text.recipesHeading}
+      data-card-catalog
+      style={`--card-overlap: ${cardOverlap}px`}
+    >
+      {
+        recipes.map((recipe, index) => {
+          const slug = recipe.id.split("/").pop();
+          const { min, max } = recipe.data.preparationTime;
+          const displayedTime = max ? `${min}–${max}` : `${min}`;
+
+          return (
+            <article
+              class="recipe-card"
+              style={`--card-order: ${index}`}
+              data-recipe-title={recipe.data.title.toLocaleLowerCase(language)}
+              data-recipe-tags={recipe.data.tags.join("|")}
+            >
+              <a
+                class="recipe-card-link"
+                href={`${baseUrl}${language}/${recipeFolder}/${slug}/`}
+                data-recipe-id={recipe.id}
+              >
+                <img
+                  class="recipe-card-image"
+                  src={imageUrl(recipe.data.image)}
+                  alt=""
+                  width="600"
+                  height="400"
+                  loading="lazy"
+                  draggable="false"
+                />
+
+                <p class="recipe-time">
+                  {displayedTime} {text.minutes}
+                </p>
+
+                <h3>{recipe.data.title}</h3>
+
+                <ul class="recipe-tags">
+                  {
+                    recipe.data.tags.slice(0, 2).map((tag) => (
+                      <li>{tag}</li>
+                    ))
+                  }
+                </ul>
+              </a>
+            </article>
+          );
+        })
+      }
+    </div>
+
+    <p class="catalog-empty" data-catalog-empty hidden>
+      {text.noResults}
+    </p>
+  </section>
+
+  {
+    renderedRecipes.map(({ recipe, Content }) => {
+      const { min, max } = recipe.data.preparationTime;
+      const displayedTime = max ? `${min}–${max}` : `${min}`;
+      const slug = recipe.id.split("/").pop();
+      const recipePageUrl = `${baseUrl}${language}/${recipeFolder}/${slug}/`;
+
+      return (
+        <template data-recipe-template={recipe.id}>
+          <article class="dialog-recipe">
+            <div class="dialog-recipe-overview">
+              <img
+                class="dialog-recipe-image"
+                src={imageUrl(recipe.data.image)}
+                alt={recipe.data.title}
+                width="900"
+                height="600"
+              />
+
+              <div class="dialog-recipe-summary">
+                <p class="recipe-time">
+                  {displayedTime} {text.minutes}
+                  {' · '}
+                  {recipe.data.servings} {text.servings}
+                </p>
+
+                <h1>{recipe.data.title}</h1>
+                <p class="dialog-recipe-description">{recipe.data.description}</p>
+
+                <ul class="recipe-tags dialog-recipe-tags">
+                  {recipe.data.tags.map((tag) => (
+                    <li>{tag}</li>
+                  ))}
+                </ul>
+
+                <div class="dialog-recipe-actions">
+                  <button
+                    class="action-button"
+                    type="button"
+                    data-share-recipe
+                    data-share-url={recipePageUrl}
+                    data-default-label={text.copyLink}
+                    data-copied-label={text.linkCopied}
+                  >
+                    {text.copyLink}
+                  </button>
+
+                  <a class="action-link" href={recipePageUrl}>
+                    {text.openFullRecipe} →
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="dialog-recipe-columns">
+              <section>
+                <h2>{text.ingredients}</h2>
+                <ul>
+                  {recipe.data.ingredients.map((ingredient) => (
+                    <li>{ingredient}</li>
+                  ))}
+                </ul>
+              </section>
+
+              <section class="dialog-method">
+                <h2>{text.method}</h2>
+                <Content />
+              </section>
+            </div>
+          </article>
+        </template>
+      );
+    })
+  }
+
+  <dialog class="recipe-dialog" data-recipe-dialog>
+    <div class="recipe-dialog-inner">
+      <button
+        class="recipe-dialog-close"
+        type="button"
+        aria-label={text.close}
+        data-recipe-dialog-close
+      >
+        ×
+      </button>
+      <div data-recipe-dialog-content></div>
+    </div>
+  </dialog>
+</BaseLayout>
+
+
+<script>
+  const catalog = document.querySelector("[data-card-catalog]");
+  const recipeDialog = document.querySelector("[data-recipe-dialog]");
+  const dialogContent = document.querySelector("[data-recipe-dialog-content]");
+  const dialogClose = document.querySelector("[data-recipe-dialog-close]");
+  const recipeSearch = document.querySelector("[data-recipe-search]");
+  const filterButtons = [
+    ...document.querySelectorAll("[data-filter-tag]"),
+  ];
+  const catalogEmpty = document.querySelector("[data-catalog-empty]");
+  const filterPicker = document.querySelector("[data-filter-picker]");
+  const filterCount = document.querySelector("[data-filter-count]");
+  const recipeTemplates = [
+    ...document.querySelectorAll("[data-recipe-template]"),
+  ];
+
+  if (catalog instanceof HTMLElement) {
+    const originalCards = [
+      ...catalog.querySelectorAll(".recipe-card"),
+    ];
+
+    let loopIsActive = false;
+    let loopWidth = 0;
+    let loopCenter = 0;
+
+    function createClone(card) {
+      const clone = card.cloneNode(true);
+
+      clone.setAttribute("aria-hidden", "true");
+      clone.setAttribute("data-loop-clone", "");
+
+      clone.querySelectorAll("a, button, input").forEach((element) => {
+        element.setAttribute("tabindex", "-1");
+      });
+
+      return clone;
+    }
+
+    function configureCatalog() {
+      loopIsActive = false;
+      loopWidth = 0;
+      loopCenter = 0;
+
+      catalog.querySelectorAll("[data-loop-clone]").forEach((clone) => {
+        clone.remove();
+      });
+
+      originalCards.forEach((card, index) => {
+        card.style.setProperty("--card-order", index);
+      });
+
+      const visibleCards = originalCards.filter((card) => !card.hidden);
+
+      const visibleOverlap =
+        visibleCards.length <= 3 ? 50 : visibleCards.length <= 6 ? 100 : 150;
+
+      catalog.style.setProperty("--card-overlap", `${visibleOverlap}px`);
+
+      catalog.scrollLeft = 0;
+
+      const catalogStyles = getComputedStyle(catalog);
+      const horizontalPadding =
+        Number.parseFloat(catalogStyles.paddingLeft) +
+        Number.parseFloat(catalogStyles.paddingRight);
+      const availableWidth = catalog.clientWidth - horizontalPadding;
+
+      const regularGap = 24;
+      const cardsWithoutOverlapWidth = visibleCards.reduce(
+        (total, card) => total + card.offsetWidth,
+        Math.max(visibleCards.length - 1, 0) * regularGap,
+      );
+
+      const infiniteLoopIsNeeded =
+        visibleCards.length > 1 &&
+        cardsWithoutOverlapWidth > availableWidth + 1;
+
+      catalog.classList.toggle(
+        "all-cards-fit",
+        !infiniteLoopIsNeeded,
+      );
+
+      if (!infiniteLoopIsNeeded) return;
+
+      const cardsBefore = visibleCards.map(createClone);
+      const cardsAfter = visibleCards.map(createClone);
+
+      catalog.prepend(...cardsBefore);
+      catalog.append(...cardsAfter);
+
+      const allCards = catalog.querySelectorAll(".recipe-card");
+
+      allCards.forEach((card, index) => {
+        card.style.setProperty("--card-order", index);
+      });
+
+      const leftPadding = Number.parseFloat(
+        getComputedStyle(catalog).paddingLeft,
+      );
+
+      loopCenter = visibleCards[0].offsetLeft - leftPadding;
+      loopWidth =
+        cardsAfter[0].offsetLeft - visibleCards[0].offsetLeft;
+
+      catalog.scrollLeft = loopCenter;
+      loopIsActive = true;
+    }
+
+    configureCatalog();
+
+    function keepLoopContinuous() {
+      if (!loopIsActive) return;
+
+      const distanceFromCenter = catalog.scrollLeft - loopCenter;
+
+      if (distanceFromCenter > loopWidth / 2) {
+        catalog.scrollLeft -= loopWidth;
+      } else if (distanceFromCenter < -loopWidth / 2) {
+        catalog.scrollLeft += loopWidth;
+      }
+    }
+
+    catalog.addEventListener("scroll", keepLoopContinuous, {
+      passive: true,
+    });
+
+    let curveFrame = 0;
+
+    function updateCurve() {
+      curveFrame = 0;
+
+      const catalogBounds = catalog.getBoundingClientRect();
+      const catalogCenter =
+        catalogBounds.left + catalogBounds.width / 2;
+      const halfWidth = catalogBounds.width / 2;
+
+      catalog.querySelectorAll(".recipe-card").forEach((card) => {
+        const cardBounds = card.getBoundingClientRect();
+        const cardCenter = cardBounds.left + cardBounds.width / 2;
+
+        const distance = (cardCenter - catalogCenter) / halfWidth;
+        const limitedDistance = Math.max(-1, Math.min(1, distance));
+
+        const verticalPosition =
+          -50 * (1 - limitedDistance * limitedDistance);
+
+        const rotation = 0;//limitedDistance * 4;
+
+        card.style.setProperty(
+          "--curve-y",
+          `${verticalPosition}px`,
+        );
+
+        card.style.setProperty(
+          "--curve-rotation",
+          `${rotation}deg`,
+        );
+      });
+    }
+
+    function requestCurveUpdate() {
+      if (curveFrame) return;
+      curveFrame = requestAnimationFrame(updateCurve);
+    }
+
+    catalog.addEventListener("scroll", requestCurveUpdate, {
+      passive: true,
+    });
+
+    let resizeTimeout = 0;
+
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimeout);
+
+      resizeTimeout = setTimeout(() => {
+        stopMomentum();
+        clearSelection();
+        configureCatalog();
+        requestCurveUpdate();
+      }, 120);
+    });
+
+    requestCurveUpdate();
+
+    let isDragging = false;
+    let hasMoved = false;
+    let blockClick = false;
+    let selectedCard = null;
+
+    let startingX = 0;
+    let startingScroll = 0;
+    let previousX = 0;
+    let previousTime = 0;
+    let velocity = 0;
+    let momentumFrame = 0;
+
+    function clearSelection() {
+      selectedCard?.classList.remove("is-selected");
+      selectedCard = null;
+    }
+
+    function openRecipeDialog(recipeId) {
+      if (
+        !(recipeDialog instanceof HTMLDialogElement) ||
+        !(dialogContent instanceof HTMLElement)
+      ) {
+        return false;
+      }
+
+      const template = recipeTemplates.find(
+        (item) => item.getAttribute("data-recipe-template") === recipeId,
+      );
+
+      if (!(template instanceof HTMLTemplateElement)) return false;
+
+      dialogContent.replaceChildren(template.content.cloneNode(true));
+      clearSelection();
+      recipeDialog.showModal();
+      return true;
+    }
+
+    if (
+      recipeDialog instanceof HTMLDialogElement &&
+      dialogClose instanceof HTMLButtonElement
+    ) {
+      dialogClose.addEventListener("click", () => recipeDialog.close());
+
+      recipeDialog.addEventListener("click", async (event) => {
+        if (event.target === recipeDialog) {
+          recipeDialog.close();
+          return;
+        }
+
+        const target = event.target;
+
+        if (!(target instanceof Element)) return;
+
+        const shareButton = target.closest("[data-share-recipe]");
+
+        if (!(shareButton instanceof HTMLButtonElement)) return;
+
+        const relativeUrl = shareButton.getAttribute("data-share-url");
+        if (!relativeUrl) return;
+
+        const fullUrl = new URL(relativeUrl, window.location.origin).href;
+
+        try {
+          await navigator.clipboard.writeText(fullUrl);
+        } catch {
+          const temporaryInput = document.createElement("textarea");
+          temporaryInput.value = fullUrl;
+          temporaryInput.style.position = "fixed";
+          temporaryInput.style.opacity = "0";
+          document.body.append(temporaryInput);
+          temporaryInput.select();
+          document.execCommand("copy");
+          temporaryInput.remove();
+        }
+
+        const defaultLabel = shareButton.getAttribute("data-default-label") ?? "";
+        const copiedLabel = shareButton.getAttribute("data-copied-label") ?? "";
+        shareButton.textContent = copiedLabel;
+
+        setTimeout(() => {
+          shareButton.textContent = defaultLabel;
+        }, 1800);
+      });
+
+      recipeDialog.addEventListener("close", () => {
+        dialogContent?.replaceChildren();
+      });
+    }
+
+    function stopMomentum() {
+      cancelAnimationFrame(momentumFrame);
+    }
+
+    const activeTags = new Set();
+
+    function normalizeSearchText(value) {
+      return value
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .toLocaleLowerCase();
+    }
+
+    function applyFilters() {
+      const query =
+        recipeSearch instanceof HTMLInputElement
+          ? normalizeSearchText(recipeSearch.value.trim())
+          : "";
+
+      let visibleCount = 0;
+
+      originalCards.forEach((card) => {
+        const title = normalizeSearchText(
+          card.getAttribute("data-recipe-title") ?? "",
+        );
+        const tags = (card.getAttribute("data-recipe-tags") ?? "").split("|");
+        const matchesSearch = title.includes(query);
+        const matchesTags = [...activeTags].every((tag) => tags.includes(tag));
+        const isVisible = matchesSearch && matchesTags;
+
+        card.hidden = !isVisible;
+        if (isVisible) visibleCount += 1;
+      });
+
+      stopMomentum();
+      clearSelection();
+      catalog.hidden = false;
+      configureCatalog();
+      requestCurveUpdate();
+
+      catalog.hidden = visibleCount === 0;
+
+      if (catalogEmpty instanceof HTMLElement) {
+        catalogEmpty.hidden = visibleCount !== 0;
+      }
+    }
+
+    if (recipeSearch instanceof HTMLInputElement) {
+      recipeSearch.addEventListener("input", applyFilters);
+    }
+
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const tag = button.getAttribute("data-filter-tag") ?? "";
+
+        if (!tag) {
+          activeTags.clear();
+        } else if (activeTags.has(tag)) {
+          activeTags.delete(tag);
+        } else {
+          activeTags.add(tag);
+        }
+
+        filterButtons.forEach((item) => {
+          const itemTag = item.getAttribute("data-filter-tag") ?? "";
+          const isActive = itemTag
+            ? activeTags.has(itemTag)
+            : activeTags.size === 0;
+
+          item.classList.toggle("is-active", isActive);
+          item.setAttribute("aria-pressed", String(isActive));
+        });
+
+        if (filterCount instanceof HTMLElement) {
+          filterCount.textContent = String(activeTags.size);
+          filterCount.hidden = activeTags.size === 0;
+        }
+
+        applyFilters();
+      });
+    });
+
+    function startMomentum() {
+      let previousFrameTime = performance.now();
+
+      function move(now) {
+        const elapsed = Math.min(now - previousFrameTime, 32);
+        previousFrameTime = now;
+
+        catalog.scrollLeft += velocity * elapsed;
+        velocity *= Math.pow(0.94, elapsed / 16);
+
+        if (Math.abs(velocity) > 0.02) {
+          momentumFrame = requestAnimationFrame(move);
+        }
+      }
+
+      momentumFrame = requestAnimationFrame(move);
+    }
+
+    catalog.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+
+      stopMomentum();
+
+      isDragging = true;
+      hasMoved = false;
+      startingX = event.clientX;
+      startingScroll = catalog.scrollLeft;
+      previousX = event.clientX;
+      previousTime = performance.now();
+      velocity = 0;
+    });
+
+    catalog.addEventListener("pointermove", (event) => {
+      if (!isDragging) return;
+
+      const distance = event.clientX - startingX;
+
+      if (Math.abs(distance) > 5 && !hasMoved) {
+        hasMoved = true;
+        clearSelection();
+        catalog.setPointerCapture(event.pointerId);
+        catalog.classList.add("is-dragging");
+        
+      }
+
+      if (!hasMoved) return;
+
+      catalog.scrollLeft = startingScroll - distance;
+
+      const now = performance.now();
+      const elapsed = Math.max(now - previousTime, 1);
+      const currentVelocity = (previousX - event.clientX) / elapsed;
+
+      velocity = velocity * 0.7 + currentVelocity * 0.3;
+      previousX = event.clientX;
+      previousTime = now;
+    });
+
+    function finishDragging(event) {
+      if (!isDragging) return;
+
+      isDragging = false;
+      catalog.classList.remove("is-dragging");
+
+      if (catalog.hasPointerCapture(event.pointerId)) {
+        catalog.releasePointerCapture(event.pointerId);
+      }
+
+      if (hasMoved) {
+        const focusedElement = document.activeElement;
+
+        if (
+          focusedElement instanceof HTMLElement &&
+          catalog.contains(focusedElement)
+        ) {
+          focusedElement.blur();
+        }
+
+        blockClick = true;
+        startMomentum();
+
+        setTimeout(() => {
+          blockClick = false;
+        }, 0);
+      }
+    }
+
+    catalog.addEventListener("pointerup", finishDragging);
+    catalog.addEventListener("pointercancel", finishDragging);
+    catalog.addEventListener("dragstart", (event) => event.preventDefault());
+
+    catalog.addEventListener("scroll", clearSelection, {
+      passive: true,
+    });
+
+    document.addEventListener("pointerdown", (event) => {
+      const target = event.target;
+
+      if (!(target instanceof Element)) return;
+
+      if (!target.closest(".recipe-card")) {
+        clearSelection();
+      }
+
+      if (
+        filterPicker instanceof HTMLDetailsElement &&
+        !target.closest("[data-filter-picker]")
+      ) {
+        filterPicker.open = false;
+      }
+    });
+
+    catalog.addEventListener(
+      "click",
+      (event) => {
+        if (blockClick) {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+
+        const target = event.target;
+
+        if (!(target instanceof Element)) return;
+
+        const clickedCard = target.closest(".recipe-card");
+
+        if (!(clickedCard instanceof HTMLElement)) return;
+
+        if (
+          event instanceof MouseEvent &&
+          (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)
+        ) {
+          return;
+        }
+
+        if (clickedCard !== selectedCard) {
+          event.preventDefault();
+
+          selectedCard?.classList.remove("is-selected");
+          clickedCard.classList.add("is-selected");
+          selectedCard = clickedCard;
+          return;
+        }
+
+        const recipeLink = clickedCard.querySelector("[data-recipe-id]");
+        const recipeId = recipeLink?.getAttribute("data-recipe-id");
+
+        if (recipeId && openRecipeDialog(recipeId)) {
+          event.preventDefault();
+        }
+      },
+      true,
+    );
+  }
+</script>

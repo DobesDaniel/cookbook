@@ -1,0 +1,123 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { ui } from "../translations/ui.js";
+
+const { recipe, language } = Astro.props;
+const text = ui[language];
+const { Content } = await render(recipe);
+
+const baseUrl = import.meta.env.BASE_URL;
+const homeUrl = `${baseUrl}${language}/`;
+const imageUrl = `${baseUrl}${recipe.data.image.replace(/^\//, "")}`;
+const absoluteImageUrl = new URL(imageUrl, Astro.site ?? Astro.url.origin).href;
+
+const currentFolder = language === "cs" ? "recepty" : "recipes";
+const currentSlug = recipe.id.split("/").pop();
+const languageUrls = {
+  [language]: `${baseUrl}${language}/${currentFolder}/${currentSlug}/`,
+};
+
+const translations = await getCollection(
+  "recipes",
+  ({ data }) =>
+    data.translationKey === recipe.data.translationKey &&
+    data.language !== language,
+);
+
+translations.sort(
+  (a, b) =>
+    a.id.length - b.id.length || a.id.localeCompare(b.id),
+);
+
+for (const translation of translations) {
+  const translatedLanguage = translation.data.language;
+  if (languageUrls[translatedLanguage]) continue;
+
+  const translatedFolder =
+    translatedLanguage === "cs" ? "recepty" : "recipes";
+  const translatedSlug = translation.id.split("/").pop();
+
+  languageUrls[translatedLanguage] =
+    `${baseUrl}${translatedLanguage}/${translatedFolder}/${translatedSlug}/`;
+}
+
+const { min, max } = recipe.data.preparationTime;
+const displayedTime = max ? `${min}–${max}` : `${min}`;
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "Recipe",
+  name: recipe.data.title,
+  description: recipe.data.description,
+  image: absoluteImageUrl,
+  inLanguage: language,
+  prepTime: `PT${max ?? min}M`,
+  recipeYield: `${recipe.data.servings}`,
+  keywords: recipe.data.tags.join(", "),
+  recipeIngredient: recipe.data.ingredients,
+};
+---
+
+<BaseLayout
+  language={language}
+  title={`${recipe.data.title} | ${text.siteName}`}
+  description={recipe.data.description}
+  image={imageUrl}
+  pageType="article"
+  structuredData={structuredData}
+  bodyClass="recipe-page"
+  languageUrls={languageUrls}
+  showTranslationAvailability={true}
+>
+  <article class="recipe-detail">
+    <nav class="recipe-detail-toolbar" aria-label={recipe.data.title}>
+      <a class="back-link" href={homeUrl}>← {text.backToRecipes}</a>
+    </nav>
+
+    <section class="recipe-detail-hero">
+      <img
+        class="recipe-detail-image"
+        src={imageUrl}
+        alt={recipe.data.title}
+        width="1200"
+        height="800"
+      />
+
+      <div class="recipe-detail-summary">
+        <ul class="recipe-tags recipe-detail-tags">
+          {recipe.data.tags.map((tag) => <li>{tag}</li>)}
+        </ul>
+
+        <h1>{recipe.data.title}</h1>
+        <p class="recipe-detail-description">{recipe.data.description}</p>
+
+        <dl class="recipe-facts">
+          <div>
+            <dt>{text.minutes}</dt>
+            <dd>{displayedTime}</dd>
+          </div>
+          <div>
+            <dt>{text.servings}</dt>
+            <dd>{recipe.data.servings}</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <div class="recipe-detail-content">
+      <aside class="recipe-ingredients">
+        <h2>{text.ingredients}</h2>
+        <ul>
+          {recipe.data.ingredients.map((ingredient) => (
+            <li>{ingredient}</li>
+          ))}
+        </ul>
+      </aside>
+
+      <section class="recipe-method">
+        <h2>{text.method}</h2>
+        <Content />
+      </section>
+    </div>
+  </article>
+</BaseLayout>

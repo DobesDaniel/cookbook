@@ -1,0 +1,127 @@
+---
+import "../styles/global.css";
+import { ui } from "../translations/ui.js";
+
+const {
+  language,
+  title,
+  description = "",
+  image,
+  pageType = "website",
+  noIndex = false,
+  structuredData,
+  bodyClass = "",
+  languageUrls = {},
+  showTranslationAvailability = false,
+} = Astro.props;
+const text = ui[language];
+const baseUrl = import.meta.env.BASE_URL;
+const languages = [
+  { code: "cs", label: "Čeština", flag: "cz.svg" },
+  { code: "en", label: "English", flag: "gb.svg" },
+];
+const currentLanguage = languages.find((item) => item.code === language);
+const isEditorPage = Astro.url.pathname.endsWith("/editor/");
+const siteOrigin = Astro.site ?? Astro.url.origin;
+const canonicalUrl = new URL(Astro.url.pathname, siteOrigin).href;
+const socialImageUrl = image ? new URL(image, siteOrigin).href : undefined;
+const [siteNamePrimary, ...siteNameRest] = text.siteName.split(" ");
+const siteNameAccent = siteNameRest.join(" ");
+---
+
+<html lang={language}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href={`${baseUrl}favicon.svg`} />
+    <meta name="theme-color" content="#355c4a" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonicalUrl} />
+    {noIndex && <meta name="robots" content="noindex, nofollow" />}
+
+    <meta property="og:type" content={pageType} />
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:locale" content={language === "cs" ? "cs_CZ" : "en_GB"} />
+    {socialImageUrl && <meta property="og:image" content={socialImageUrl} />}
+    <meta name="twitter:card" content={socialImageUrl ? "summary_large_image" : "summary"} />
+
+    {Object.entries(languageUrls).map(([code, href]) => (
+      <link rel="alternate" hreflang={code} href={new URL(href, siteOrigin).href} />
+    ))}
+    {structuredData && (
+      <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+    )}
+  </head>
+
+  <body class={bodyClass}>
+    <header class="site-header">
+      <a class="site-name" href={`${baseUrl}${language}/`}>
+        <span class="site-name-primary">{siteNamePrimary}</span>{" "}
+        <span class="site-name-accent">{siteNameAccent}</span>
+      </a>
+
+      <div class="header-actions">
+        <a
+          class="add-recipe-link"
+          href={isEditorPage ? `${baseUrl}${language}/` : `${baseUrl}${language}/editor/`}
+        >
+          <span class="add-recipe-symbol" aria-hidden="true">
+            {isEditorPage ? "←" : "＋"}
+          </span>
+          <span class="add-recipe-label">
+            {isEditorPage ? text.backToRecipes : text.addRecipe}
+          </span>
+        </a>
+
+        <details class="language-picker">
+          <summary aria-label={currentLanguage?.label} title={currentLanguage?.label}>
+            <img
+              src={`${baseUrl}flags/${currentLanguage?.flag}`}
+              alt=""
+              width="30"
+              height="20"
+            />
+          </summary>
+
+          <ul>
+            {languages.map((item) => {
+              const hasRecipeTranslation = Boolean(languageUrls[item.code]);
+              const translationIsMissing =
+                showTranslationAvailability &&
+                item.code !== language &&
+                !hasRecipeTranslation;
+
+              return (
+                <li>
+                  <a
+                    href={languageUrls[item.code] ?? `${baseUrl}${item.code}/`}
+                    aria-current={item.code === language ? "page" : undefined}
+                  >
+                    <img
+                      src={`${baseUrl}flags/${item.flag}`}
+                      alt=""
+                      width="30"
+                      height="20"
+                    />
+                    <span class="language-option-text">
+                      {item.label}
+                      {translationIsMissing && (
+                        <small>{text.translationUnavailable}</small>
+                      )}
+                    </span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </details>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+  </body>
+</html>

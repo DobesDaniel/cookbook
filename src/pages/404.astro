@@ -1,0 +1,96 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const baseUrl = import.meta.env.BASE_URL;
+---
+
+<BaseLayout
+  language="cs"
+  title="404 | Repertoár receptů"
+  description="Požadovaná stránka nebyla nalezena."
+  noIndex={true}
+  bodyClass="error-page"
+>
+  <section class="error-content" data-error-copy="cs">
+    <p class="error-code">404</p>
+    <h1>Tady žádný recept není.</h1>
+    <p>
+      Odkaz je možná starý nebo se recept někam zatoulal. Vrať se do kartotéky
+      a vyber si jiný.
+    </p>
+    <a class="action-button error-home-link" href={`${baseUrl}cs/`}>
+      Zpět k receptům
+    </a>
+  </section>
+
+  <section class="error-content" data-error-copy="en" hidden>
+    <p class="error-code">404</p>
+    <h1>There is no recipe here.</h1>
+    <p>
+      The link may be outdated, or the recipe wandered off. Return to the card
+      index and choose another one.
+    </p>
+    <a class="action-button error-home-link" href={`${baseUrl}en/`}>
+      Back to recipes
+    </a>
+  </section>
+</BaseLayout>
+
+<script define:vars={{ baseUrl }}>
+  const segments = window.location.pathname.split("/").filter(Boolean);
+  const language = segments.includes("en")
+    ? "en"
+    : segments.includes("cs")
+      ? "cs"
+      : navigator.language.toLocaleLowerCase().startsWith("en")
+        ? "en"
+        : "cs";
+
+  document.documentElement.lang = language;
+
+  document.querySelectorAll("[data-error-copy]").forEach((section) => {
+    section.hidden = section.getAttribute("data-error-copy") !== language;
+  });
+
+  const siteName = document.querySelector(".site-name");
+  const siteNamePrimary = document.querySelector(".site-name-primary");
+  const siteNameAccent = document.querySelector(".site-name-accent");
+  const addRecipeLink = document.querySelector(".add-recipe-link");
+  const addRecipeLabel = document.querySelector(".add-recipe-label");
+  const currentFlag = document.querySelector(".language-picker summary img");
+  const languageSummary = document.querySelector(".language-picker summary");
+
+  if (siteName instanceof HTMLAnchorElement) {
+    siteName.href = `${baseUrl}${language}/`;
+  }
+
+  if (siteNamePrimary instanceof HTMLElement) {
+    siteNamePrimary.textContent = language === "en" ? "Recipe" : "Repertoár";
+  }
+
+  if (siteNameAccent instanceof HTMLElement) {
+    siteNameAccent.textContent = language === "en" ? "Repertoire" : "receptů";
+  }
+
+  if (addRecipeLink instanceof HTMLAnchorElement) {
+    addRecipeLink.href = `${baseUrl}${language}/editor/`;
+  }
+
+  if (addRecipeLabel instanceof HTMLElement) {
+    addRecipeLabel.textContent = language === "en" ? "Add recipe" : "Přidat recept";
+  }
+
+  if (currentFlag instanceof HTMLImageElement) {
+    currentFlag.src = `${baseUrl}flags/${language === "en" ? "gb.svg" : "cz.svg"}`;
+  }
+
+  if (languageSummary instanceof HTMLElement) {
+    const label = language === "en" ? "English" : "Čeština";
+    languageSummary.setAttribute("aria-label", label);
+    languageSummary.setAttribute("title", label);
+  }
+
+  document.title = language === "en"
+    ? "404 | Recipe Repertoire"
+    : "404 | Repertoár receptů";
+</script>

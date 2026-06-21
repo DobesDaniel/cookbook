@@ -1,0 +1,458 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const { language } = Astro.props;
+const baseUrl = import.meta.env.BASE_URL;
+const languageUrls = {
+  cs: `${baseUrl}cs/editor/`,
+  en: `${baseUrl}en/editor/`,
+};
+
+const translations = {
+  cs: {
+    pageTitle: "Editor receptů | Repertoár receptů",
+    heading: "Nový recept",
+    introduction: "Vyplň údaje, zkontroluj náhled a stáhni hotový soubor pro kuchařku.",
+    basic: "Základní údaje",
+    language: "Jazyk",
+    servings: "Počet porcí",
+    title: "Název receptu",
+    titlePlaceholder: "Nadýchané lívance",
+    description: "Krátký popis",
+    descriptionPlaceholder: "Jednoduché snídaňové lívance s ovocem.",
+    slug: "Slug / název souboru",
+    slugPlaceholder: "nadychane-livance",
+    translationKey: "Klíč překladu",
+    translationKeyPlaceholder: "fluffy-pancakes",
+    translationHelp: "Obě jazykové verze stejného receptu musí mít stejný klíč překladu.",
+    details: "Čas, tagy a obrázek",
+    timeMin: "Minimální čas (min)",
+    timeMax: "Maximální čas (volitelné)",
+    tags: "Tagy oddělené čárkou",
+    tagsPlaceholder: "Snídaně, Sladké",
+    image: "Cesta k obrázku",
+    ingredientsAndMethod: "Suroviny a postup",
+    ingredients: "Suroviny – jedna na řádek",
+    ingredientsPlaceholder: "250 g hladké mouky\n2 vejce\n300 ml mléka",
+    steps: "Kroky – jeden na řádek",
+    stepsPlaceholder: "Smíchejte suché suroviny.\nPřidejte vejce a mléko.\nOpékejte dozlatova.",
+    output: "Výstup",
+    create: "Vytvořit a stáhnout",
+    uploadTo: "Nahraj do:",
+    fallbackSlug: "recept",
+    created: "Soubor {filename} byl vytvořen. Nahraj ho do zobrazené složky.",
+    confirmTitle: "Stáhnout recept?",
+    confirmMessage: "Vytvoří se soubor {filename}. Potom ho nahraj do zobrazené složky.",
+    cancel: "Zrušit",
+    confirmDownload: "Ano, stáhnout",
+  },
+  en: {
+    pageTitle: "Recipe editor | Recipe Repertoire",
+    heading: "New recipe",
+    introduction: "Fill in the details, check the preview, and download the finished cookbook file.",
+    basic: "Basic information",
+    language: "Language",
+    servings: "Servings",
+    title: "Recipe title",
+    titlePlaceholder: "Fluffy pancakes",
+    description: "Short description",
+    descriptionPlaceholder: "Simple breakfast pancakes served with fruit.",
+    slug: "Slug / file name",
+    slugPlaceholder: "fluffy-pancakes",
+    translationKey: "Translation key",
+    translationKeyPlaceholder: "fluffy-pancakes",
+    translationHelp: "Both language versions of the same recipe must use the same translation key.",
+    details: "Time, tags, and image",
+    timeMin: "Minimum time (min)",
+    timeMax: "Maximum time (optional)",
+    tags: "Comma-separated tags",
+    tagsPlaceholder: "Breakfast, Sweet",
+    image: "Image path",
+    ingredientsAndMethod: "Ingredients and method",
+    ingredients: "Ingredients – one per line",
+    ingredientsPlaceholder: "250 g plain flour\n2 eggs\n300 ml milk",
+    steps: "Steps – one per line",
+    stepsPlaceholder: "Combine the dry ingredients.\nAdd the eggs and milk.\nCook until golden.",
+    output: "Output",
+    create: "Create and download",
+    uploadTo: "Upload to:",
+    fallbackSlug: "recipe",
+    created: "File {filename} was created. Upload it to the folder shown above.",
+    confirmTitle: "Download recipe?",
+    confirmMessage: "The file {filename} will be created. Upload it to the folder shown above afterwards.",
+    cancel: "Cancel",
+    confirmDownload: "Yes, download",
+  },
+};
+
+const text = translations[language];
+---
+
+<BaseLayout
+  language={language}
+  title={text.pageTitle}
+  description={text.introduction}
+  noIndex={true}
+  bodyClass="editor-page"
+  languageUrls={languageUrls}
+>
+  <div class="editor-shell">
+    <header class="editor-introduction">
+      <h1>{text.heading}</h1>
+      <p>{text.introduction}</p>
+    </header>
+
+    <form
+      class="recipe-editor"
+      data-recipe-editor
+      data-fallback-slug={text.fallbackSlug}
+      data-created-message={text.created}
+    >
+      <div class="editor-form">
+        <section class="editor-panel">
+          <h2>{text.basic}</h2>
+
+          <div class="editor-fields-two">
+            <label>
+              {text.language}
+              <select name="language">
+                <option value="cs" selected={language === "cs"}>Čeština</option>
+                <option value="en" selected={language === "en"}>English</option>
+              </select>
+            </label>
+
+            <label>
+              {text.servings}
+              <input name="servings" type="number" min="1" value="4" required />
+            </label>
+          </div>
+
+          <label>
+            {text.title}
+            <input name="title" type="text" required placeholder={text.titlePlaceholder} />
+          </label>
+
+          <label>
+            {text.description}
+            <textarea
+              name="description"
+              rows="3"
+              required
+              placeholder={text.descriptionPlaceholder}
+            ></textarea>
+          </label>
+
+          <div class="editor-fields-two">
+            <label>
+              {text.slug}
+              <input name="slug" type="text" required placeholder={text.slugPlaceholder} />
+            </label>
+
+            <label>
+              {text.translationKey}
+              <input
+                name="translationKey"
+                type="text"
+                required
+                placeholder={text.translationKeyPlaceholder}
+              />
+            </label>
+          </div>
+
+          <p class="editor-help">{text.translationHelp}</p>
+        </section>
+
+        <section class="editor-panel">
+          <h2>{text.details}</h2>
+
+          <div class="editor-fields-two">
+            <label>
+              {text.timeMin}
+              <input name="timeMin" type="number" min="1" required value="30" />
+            </label>
+
+            <label>
+              {text.timeMax}
+              <input name="timeMax" type="number" min="1" />
+            </label>
+          </div>
+
+          <label>
+            {text.tags}
+            <input name="tags" type="text" required placeholder={text.tagsPlaceholder} />
+          </label>
+
+          <label>
+            {text.image}
+            <input
+              name="image"
+              type="text"
+              required
+              value="/images/"
+              placeholder="/images/recipe.webp"
+            />
+          </label>
+        </section>
+
+        <section class="editor-panel">
+          <h2>{text.ingredientsAndMethod}</h2>
+
+          <label>
+            {text.ingredients}
+            <textarea
+              name="ingredients"
+              rows="9"
+              required
+              placeholder={text.ingredientsPlaceholder}
+            ></textarea>
+          </label>
+
+          <label>
+            {text.steps}
+            <textarea
+              name="steps"
+              rows="9"
+              required
+              placeholder={text.stepsPlaceholder}
+            ></textarea>
+          </label>
+        </section>
+      </div>
+
+      <aside class="editor-preview-panel">
+        <div class="editor-preview-heading">
+          <div>
+            <p class="editor-eyebrow">{text.output}</p>
+            <h2 data-editor-filename>{text.fallbackSlug}.md</h2>
+          </div>
+          <button class="action-button" type="submit">{text.create}</button>
+        </div>
+
+        <p class="editor-destination">
+          {text.uploadTo} <code data-editor-destination>src/content/recipes/{language}/{text.fallbackSlug}.md</code>
+        </p>
+
+        <pre class="markdown-preview"><code data-markdown-preview></code></pre>
+        <p class="editor-status" data-editor-status aria-live="polite"></p>
+      </aside>
+    </form>
+
+    <dialog class="editor-confirm-dialog" data-editor-confirm>
+      <div class="editor-confirm-content">
+        <h2>{text.confirmTitle}</h2>
+        <p
+          data-editor-confirm-message
+          data-message-template={text.confirmMessage}
+        ></p>
+
+        <div class="editor-confirm-actions">
+          <button class="secondary-button" type="button" data-editor-cancel>
+            {text.cancel}
+          </button>
+          <button class="action-button" type="button" data-editor-download>
+            {text.confirmDownload}
+          </button>
+        </div>
+      </div>
+    </dialog>
+  </div>
+</BaseLayout>
+
+<script>
+  const form = document.querySelector("[data-recipe-editor]");
+
+  if (form instanceof HTMLFormElement) {
+    const titleInput = form.elements.namedItem("title");
+    const slugInput = form.elements.namedItem("slug");
+    const translationKeyInput = form.elements.namedItem("translationKey");
+    const preview = document.querySelector("[data-markdown-preview]");
+    const filename = document.querySelector("[data-editor-filename]");
+    const destination = document.querySelector("[data-editor-destination]");
+    const status = document.querySelector("[data-editor-status]");
+    const confirmDialog = document.querySelector("[data-editor-confirm]");
+    const confirmMessage = document.querySelector("[data-editor-confirm-message]");
+    const cancelButton = document.querySelector("[data-editor-cancel]");
+    const downloadButton = document.querySelector("[data-editor-download]");
+    const fallbackSlug = form.dataset.fallbackSlug || "recipe";
+
+    let slugWasEdited = false;
+    let translationKeyWasEdited = false;
+    let pendingDownload = null;
+
+    function slugify(value) {
+      return value
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .toLocaleLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 80);
+    }
+
+    function yamlString(value) {
+      return JSON.stringify(String(value).trim());
+    }
+
+    function nonEmptyLines(value) {
+      return String(value)
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+    }
+
+    function buildMarkdown() {
+      const data = new FormData(form);
+      const title = String(data.get("title") ?? "");
+      const description = String(data.get("description") ?? "");
+      const language = String(data.get("language") ?? "cs");
+      const slug = slugify(String(data.get("slug") ?? "")) || fallbackSlug;
+      const translationKey =
+        slugify(String(data.get("translationKey") ?? "")) || slug;
+      const timeMin = Number(data.get("timeMin")) || 1;
+      const timeMax = Number(data.get("timeMax")) || 0;
+      const servings = Number(data.get("servings")) || 1;
+      const image = String(data.get("image") ?? "");
+      const tags = String(data.get("tags") ?? "")
+        .split(/[,\n]/)
+        .map((tag) => tag.trim())
+        .filter(Boolean);
+      const ingredients = nonEmptyLines(data.get("ingredients") ?? "");
+      const steps = nonEmptyLines(data.get("steps") ?? "");
+
+      const lines = [
+        "---",
+        `title: ${yamlString(title)}`,
+        `description: ${yamlString(description)}`,
+        `language: ${yamlString(language)}`,
+        `translationKey: ${yamlString(translationKey)}`,
+        "",
+        "preparationTime:",
+        `  min: ${timeMin}`,
+      ];
+
+      if (timeMax > 0) lines.push(`  max: ${timeMax}`);
+
+      lines.push(
+        "",
+        `servings: ${servings}`,
+        "",
+        "tags:",
+        ...tags.map((tag) => `  - ${yamlString(tag)}`),
+        "",
+        `image: ${yamlString(image)}`,
+        "",
+        "ingredients:",
+        ...ingredients.map((ingredient) => `  - ${yamlString(ingredient)}`),
+        "---",
+        "",
+        ...steps.map((step, index) => `${index + 1}. ${step}`),
+        "",
+      );
+
+      return { markdown: lines.join("\n"), slug, language };
+    }
+
+    function updatePreview() {
+      const result = buildMarkdown();
+
+      if (preview) preview.textContent = result.markdown;
+      if (filename) filename.textContent = `${result.slug}.md`;
+      if (destination) {
+        destination.textContent =
+          `src/content/recipes/${result.language}/${result.slug}.md`;
+      }
+    }
+
+    if (
+      titleInput instanceof HTMLInputElement &&
+      slugInput instanceof HTMLInputElement &&
+      translationKeyInput instanceof HTMLInputElement
+    ) {
+      titleInput.addEventListener("input", () => {
+        const suggestedSlug = slugify(titleInput.value);
+
+        if (!slugWasEdited) slugInput.value = suggestedSlug;
+        if (!translationKeyWasEdited) translationKeyInput.value = suggestedSlug;
+      });
+
+      slugInput.addEventListener("input", () => {
+        slugWasEdited = true;
+      });
+
+      translationKeyInput.addEventListener("input", () => {
+        translationKeyWasEdited = true;
+      });
+    }
+
+    form.addEventListener("input", updatePreview);
+    form.addEventListener("change", updatePreview);
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      if (!form.reportValidity()) return;
+
+      const result = buildMarkdown();
+      pendingDownload = result;
+
+      if (
+        confirmDialog instanceof HTMLDialogElement &&
+        confirmMessage instanceof HTMLElement
+      ) {
+        const messageTemplate =
+          confirmMessage.dataset.messageTemplate || "{filename}";
+        confirmMessage.textContent = messageTemplate.replace(
+          "{filename}",
+          `${result.slug}.md`,
+        );
+        confirmDialog.showModal();
+      }
+    });
+
+    if (
+      confirmDialog instanceof HTMLDialogElement &&
+      cancelButton instanceof HTMLButtonElement &&
+      downloadButton instanceof HTMLButtonElement
+    ) {
+      cancelButton.addEventListener("click", () => {
+        pendingDownload = null;
+        confirmDialog.close();
+      });
+
+      confirmDialog.addEventListener("click", (event) => {
+        if (event.target === confirmDialog) {
+          pendingDownload = null;
+          confirmDialog.close();
+        }
+      });
+
+      downloadButton.addEventListener("click", () => {
+        if (!pendingDownload) return;
+
+        const result = pendingDownload;
+        pendingDownload = null;
+        const blob = new Blob([result.markdown], {
+          type: "text/markdown;charset=utf-8",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = `${result.slug}.md`;
+        link.click();
+        URL.revokeObjectURL(url);
+        confirmDialog.close();
+
+        if (status) {
+          const message = form.dataset.createdMessage || "{filename}";
+          status.textContent = message.replace(
+            "{filename}",
+            `${result.slug}.md`,
+          );
+        }
+      });
+    }
+
+    updatePreview();
+  }
+</script>
