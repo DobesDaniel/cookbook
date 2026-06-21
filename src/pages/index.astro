@@ -1,4 +1,7 @@
 ---
-const target = `${import.meta.env.BASE_URL}cs/`;
-return Astro.redirect(target);
+import HomePage from "../components/HomePage.astro";
+
+const canonicalPath = `${import.meta.env.BASE_URL}cs/`;
 ---
+
+<HomePage language="cs" canonicalPath={canonicalPath} />

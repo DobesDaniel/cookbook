@@ -3,7 +3,7 @@ import { getCollection, render } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { ui } from "../translations/ui.js";
 
-const { language } = Astro.props;
+const { language, canonicalPath } = Astro.props;
 const text = ui[language];
 
 const recipes = (await getCollection("recipes")).filter(
@@ -35,6 +35,7 @@ const availableTags = [
   language={language}
   title={`${text.heading} | ${text.siteName}`}
   description={text.introduction}
+  canonicalPath={canonicalPath}
   bodyClass="catalog-page"
   languageUrls={languageUrls}
 >

@@ -10,6 +10,7 @@ const {
   pageType = "website",
   noIndex = false,
   structuredData,
+  canonicalPath = Astro.url.pathname,
   bodyClass = "",
   languageUrls = {},
   showTranslationAvailability = false,
@@ -23,7 +24,7 @@ const languages = [
 const currentLanguage = languages.find((item) => item.code === language);
 const isEditorPage = Astro.url.pathname.endsWith("/editor/");
 const siteOrigin = Astro.site ?? Astro.url.origin;
-const canonicalUrl = new URL(Astro.url.pathname, siteOrigin).href;
+const canonicalUrl = new URL(canonicalPath, siteOrigin).href;
 const socialImageUrl = image ? new URL(image, siteOrigin).href : undefined;
 const [siteNamePrimary, ...siteNameRest] = text.siteName.split(" ");
 const siteNameAccent = siteNameRest.join(" ");
