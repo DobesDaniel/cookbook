@@ -1127,8 +1127,125 @@ input {
 }
 
 @media (max-width: 600px) {
-  .hero {
-    padding-top: 56px;
+  .catalog-page {
+    display: flex;
+    height: 100dvh;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .catalog-page .site-header {
+    width: 100%;
+    flex: 0 0 auto;
+    padding: 10px 14px;
+  }
+
+  .catalog-page .site-name {
+    font-size: 18px;
+  }
+
+  .catalog-page main {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+  }
+
+  .catalog-page .hero {
+    width: 100%;
+    flex: 0 0 auto;
+    padding: 16px 16px 14px;
+  }
+
+  .catalog-page .hero h1 {
+    margin-bottom: 7px;
+    font-size: clamp(27px, 8.4vw, 34px);
+    line-height: 0.98;
+  }
+
+  .catalog-page .hero p {
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .catalog-page .catalog-section {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+    padding: 10px 0 0;
+  }
+
+  .catalog-page .catalog-controls {
+    flex: 0 0 auto;
+    align-items: center;
+    flex-direction: row;
+    gap: 8px;
+    padding: 0 12px;
+  }
+
+  .catalog-page .recipe-search {
+    min-width: 0;
+    width: auto;
+    flex: 1;
+    padding: 8px 12px;
+  }
+
+  .catalog-page .tag-picker summary {
+    padding: 8px 12px;
+  }
+
+  .catalog-page .card-catalog {
+    min-height: 0;
+    flex: 1;
+    padding: 68px 12px 10px;
+  }
+
+  .catalog-page .card-catalog.all-cards-fit {
+    padding-top: 40px;
+  }
+
+  .catalog-page .recipe-card {
+    flex-basis: 220px;
+    height: 290px;
+    min-height: 0;
+  }
+
+  .catalog-page .recipe-card-link {
+    height: 290px;
+    padding: 18px;
+  }
+
+  .catalog-page .recipe-card.is-selected .recipe-card-link {
+    transform: translateY(-36px);
+  }
+
+  .catalog-page .recipe-card-image {
+    width: calc(100% + 36px);
+    height: 96px;
+    margin: -18px -18px 14px;
+  }
+
+  .catalog-page .recipe-time {
+    margin-bottom: 10px;
+    font-size: 11px;
+  }
+
+  .catalog-page .recipe-card h3 {
+    margin-bottom: 8px;
+    font-size: 22px;
+    line-height: 1.05;
+  }
+
+  .catalog-page .recipe-tags {
+    gap: 5px;
+    height: 48px;
+    margin-top: auto;
+  }
+
+  .catalog-page .recipe-tags li {
+    padding: 5px 8px;
+    font-size: 11px;
   }
 
   .add-recipe-label {
@@ -1139,19 +1256,6 @@ input {
     width: 34px;
     justify-content: center;
     padding-inline: 6px;
-  }
-
-  .recipe-card {
-    flex-basis: 260px;
-  }
-
-  .catalog-controls {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .recipe-search {
-    width: 100%;
   }
 
   .editor-shell {

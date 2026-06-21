@@ -372,6 +372,9 @@ const availableTags = [
       const catalogCenter =
         catalogBounds.left + catalogBounds.width / 2;
       const halfWidth = catalogBounds.width / 2;
+      const curveDepth = window.matchMedia("(max-width: 600px)").matches
+        ? 28
+        : 50;
 
       catalog.querySelectorAll(".recipe-card").forEach((card) => {
         const cardBounds = card.getBoundingClientRect();
@@ -381,7 +384,7 @@ const availableTags = [
         const limitedDistance = Math.max(-1, Math.min(1, distance));
 
         const verticalPosition =
-          -50 * (1 - limitedDistance * limitedDistance);
+          -curveDepth * (1 - limitedDistance * limitedDistance);
 
         const rotation = 0;//limitedDistance * 4;
 
