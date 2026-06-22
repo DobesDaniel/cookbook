@@ -19,8 +19,8 @@ ingredients:
   - "50-100 g parmazánu nebo poobného sýra"
   - "1-2 stroužky česneku"
   - "1/2 hrnku mléka"
-  - "500g kuřecí maso"
-  - "320g těstoviny"
+  - "500g kuřecího maso"
+  - "320g těstovin"
   - "sůl"
   - "pepř"
 ---
