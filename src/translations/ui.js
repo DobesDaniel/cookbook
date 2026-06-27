@@ -21,7 +21,7 @@ export const ui = {
     translationUnavailable: "Překlad není k dispozici – otevře se přehled.",
     tools: "Nástroje",
     newRecipe: "Nový recept",
-    addRecipe: "Přidat recept",
+    addRecipe: "Editor receptů",
     about: "O kuchařce",
   },
 
@@ -47,7 +47,7 @@ export const ui = {
     translationUnavailable: "Translation unavailable – opens the recipe index.",
     tools: "Tools",
     newRecipe: "New recipe",
-    addRecipe: "Add recipe",
+    addRecipe: "Recipe editor",
     about: "About",
   },
 };

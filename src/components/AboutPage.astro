@@ -11,7 +11,7 @@ const translations = {
     title: "O kuchařce",
     heading: "Recepty, ke kterým se vracím.",
     introduction:
-      "Repertoár receptů je moje osobní kuchařka pro jídla, která znám, vařím a upravuji podle vlastní chuti.",
+      "Repertoár receptů je moje kuchařka pro jídla, která znám, vařím a upravuji podle mé chuti.",
     originTitle: "Proč vznikla",
     origin:
       "Chtěl jsem mít osvědčené recepty na jednom místě a nemuset pokaždé hledat poznámky, odkazy nebo starší verze postupů.",
@@ -66,27 +66,28 @@ const structuredData = {
   structuredData={structuredData}
 >
   <article class="about-content">
-    <header class="about-hero">
-      <p class="about-eyebrow">{copy.title}</p>
+    <header class="about-introduction">
       <h1>{copy.heading}</h1>
       <p>{copy.introduction}</p>
     </header>
 
-    <div class="about-sections">
-      <section>
-        <h2>{copy.originTitle}</h2>
-        <p>{copy.origin}</p>
-      </section>
+    <div class="about-body">
+      <div class="about-sections">
+        <section>
+          <h2>{copy.originTitle}</h2>
+          <p>{copy.origin}</p>
+        </section>
 
-      <section>
-        <h2>{copy.approachTitle}</h2>
-        <p>{copy.approach}</p>
-      </section>
+        <section>
+          <h2>{copy.approachTitle}</h2>
+          <p>{copy.approach}</p>
+        </section>
 
-      <section>
-        <h2>{copy.authorTitle}</h2>
-        <p>{copy.author}</p>
-      </section>
+        <section>
+          <h2>{copy.authorTitle}</h2>
+          <p>{copy.author}</p>
+        </section>
+      </div>
     </div>
   </article>
 </BaseLayout>

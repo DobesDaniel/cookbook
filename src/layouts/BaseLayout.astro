@@ -77,18 +77,30 @@ const siteNameAccent = siteNameRest.join(" ");
           title={text.about}
         >
           <span class="about-link-label">{text.about}</span>
-          <span class="about-link-icon" aria-hidden="true">i</span>
+          <svg
+            class="about-link-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 10.5v6"></path>
+            <circle class="about-link-icon-dot" cx="12" cy="7.5" r="1"></circle>
+          </svg>
         </a>
 
         <a
           class="add-recipe-link"
-          href={isEditorPage ? `${baseUrl}${language}/` : `${baseUrl}${language}/editor/`}
+          href={`${baseUrl}${language}/editor/`}
+          aria-current={isEditorPage ? "page" : undefined}
         >
           <span class="add-recipe-symbol" aria-hidden="true">
-            {isEditorPage ? "←" : "＋"}
+            <svg viewBox="0 0 24 24">
+              <path d="M4 20l4.3-1 10.9-10.9a2.1 2.1 0 0 0-3-3L5.3 16 4 20Z"></path>
+              <path d="m14.8 6.5 3 3"></path>
+            </svg>
           </span>
           <span class="add-recipe-label">
-            {isEditorPage ? text.backToRecipes : text.addRecipe}
+            {text.addRecipe}
           </span>
         </a>
 

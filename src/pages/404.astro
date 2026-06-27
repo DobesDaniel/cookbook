@@ -93,7 +93,8 @@ const baseUrl = import.meta.env.BASE_URL;
   }
 
   if (addRecipeLabel instanceof HTMLElement) {
-    addRecipeLabel.textContent = language === "en" ? "Add recipe" : "Přidat recept";
+    addRecipeLabel.textContent =
+      language === "en" ? "Recipe editor" : "Editor receptů";
   }
 
   if (currentFlag instanceof HTMLImageElement) {
