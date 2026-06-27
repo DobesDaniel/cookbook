@@ -22,6 +22,7 @@ export const ui = {
     tools: "Nástroje",
     newRecipe: "Nový recept",
     addRecipe: "Přidat recept",
+    about: "O kuchařce",
   },
 
   en: {
@@ -47,5 +48,6 @@ export const ui = {
     tools: "Tools",
     newRecipe: "New recipe",
     addRecipe: "Add recipe",
+    about: "About",
   },
 };

@@ -1,0 +1,92 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { ui } from "../translations/ui.js";
+
+const { language } = Astro.props;
+const text = ui[language];
+const baseUrl = import.meta.env.BASE_URL;
+
+const translations = {
+  cs: {
+    title: "O kuchařce",
+    heading: "Recepty, ke kterým se vracím.",
+    introduction:
+      "Repertoár receptů je moje osobní kuchařka pro jídla, která znám, vařím a upravuji podle vlastní chuti.",
+    originTitle: "Proč vznikla",
+    origin:
+      "Chtěl jsem mít osvědčené recepty na jednom místě a nemuset pokaždé hledat poznámky, odkazy nebo starší verze postupů.",
+    approachTitle: "Jak recepty používám",
+    approach:
+      "Recepty beru jako praktické poznámky, ne jako neměnná pravidla. Časy jsou orientační a jednotlivé postupy průběžně doplňuji podle dalších zkušeností.",
+    authorTitle: "Kdo ji tvoří",
+    author:
+      "Jmenuji se Daniel Dobeš. Kuchařku vytvářím pro sebe, rodinu a přátele a sdílím v ní recepty, ke kterým má smysl se vracet.",
+  },
+  en: {
+    title: "About",
+    heading: "Recipes I keep coming back to.",
+    introduction:
+      "Recipe Repertoire is my personal cookbook for dishes I know, cook, and adapt to my own taste.",
+    originTitle: "Why it exists",
+    origin:
+      "I wanted to keep reliable recipes in one place instead of searching through notes, links, and older versions of instructions every time.",
+    approachTitle: "How I use the recipes",
+    approach:
+      "I treat recipes as practical notes rather than fixed rules. Times are approximate, and I continue refining the instructions as I gain more experience with each dish.",
+    authorTitle: "Who makes it",
+    author:
+      "My name is Daniel Dobeš. I create this cookbook for myself, my family, and friends, sharing recipes that are worth returning to.",
+  },
+};
+
+const copy = translations[language];
+const languageUrls = {
+  cs: `${baseUrl}cs/o-kucharce/`,
+  en: `${baseUrl}en/about/`,
+};
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  name: copy.title,
+  description: copy.introduction,
+  inLanguage: language,
+  author: {
+    "@type": "Person",
+    name: "Daniel Dobeš",
+  },
+};
+---
+
+<BaseLayout
+  language={language}
+  title={`${copy.title} | ${text.siteName}`}
+  description={copy.introduction}
+  bodyClass="about-page"
+  languageUrls={languageUrls}
+  structuredData={structuredData}
+>
+  <article class="about-content">
+    <header class="about-hero">
+      <p class="about-eyebrow">{copy.title}</p>
+      <h1>{copy.heading}</h1>
+      <p>{copy.introduction}</p>
+    </header>
+
+    <div class="about-sections">
+      <section>
+        <h2>{copy.originTitle}</h2>
+        <p>{copy.origin}</p>
+      </section>
+
+      <section>
+        <h2>{copy.approachTitle}</h2>
+        <p>{copy.approach}</p>
+      </section>
+
+      <section>
+        <h2>{copy.authorTitle}</h2>
+        <p>{copy.author}</p>
+      </section>
+    </div>
+  </article>
+</BaseLayout>

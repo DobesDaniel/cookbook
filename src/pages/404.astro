@@ -55,6 +55,8 @@ const baseUrl = import.meta.env.BASE_URL;
   const siteName = document.querySelector(".site-name");
   const siteNamePrimary = document.querySelector(".site-name-primary");
   const siteNameAccent = document.querySelector(".site-name-accent");
+  const aboutLink = document.querySelector(".about-link");
+  const aboutLabel = document.querySelector(".about-link-label");
   const addRecipeLink = document.querySelector(".add-recipe-link");
   const addRecipeLabel = document.querySelector(".add-recipe-label");
   const currentFlag = document.querySelector(".language-picker summary img");
@@ -70,6 +72,20 @@ const baseUrl = import.meta.env.BASE_URL;
 
   if (siteNameAccent instanceof HTMLElement) {
     siteNameAccent.textContent = language === "en" ? "Repertoire" : "receptů";
+  }
+
+  if (aboutLink instanceof HTMLAnchorElement) {
+    const label = language === "en" ? "About" : "O kuchařce";
+    aboutLink.href =
+      language === "en"
+        ? `${baseUrl}en/about/`
+        : `${baseUrl}cs/o-kucharce/`;
+    aboutLink.setAttribute("aria-label", label);
+    aboutLink.setAttribute("title", label);
+  }
+
+  if (aboutLabel instanceof HTMLElement) {
+    aboutLabel.textContent = language === "en" ? "About" : "O kuchařce";
   }
 
   if (addRecipeLink instanceof HTMLAnchorElement) {

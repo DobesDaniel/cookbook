@@ -23,6 +23,11 @@ const languages = [
 ];
 const currentLanguage = languages.find((item) => item.code === language);
 const isEditorPage = Astro.url.pathname.endsWith("/editor/");
+const aboutUrl =
+  language === "cs"
+    ? `${baseUrl}cs/o-kucharce/`
+    : `${baseUrl}en/about/`;
+const isAboutPage = Astro.url.pathname === aboutUrl;
 const siteOrigin = Astro.site ?? Astro.url.origin;
 const canonicalUrl = new URL(canonicalPath, siteOrigin).href;
 const socialImageUrl = image ? new URL(image, siteOrigin).href : undefined;
@@ -64,6 +69,17 @@ const siteNameAccent = siteNameRest.join(" ");
       </a>
 
       <div class="header-actions">
+        <a
+          class="about-link"
+          href={aboutUrl}
+          aria-current={isAboutPage ? "page" : undefined}
+          aria-label={text.about}
+          title={text.about}
+        >
+          <span class="about-link-label">{text.about}</span>
+          <span class="about-link-icon" aria-hidden="true">i</span>
+        </a>
+
         <a
           class="add-recipe-link"
           href={isEditorPage ? `${baseUrl}${language}/` : `${baseUrl}${language}/editor/`}
