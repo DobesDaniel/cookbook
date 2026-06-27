@@ -10,7 +10,12 @@ preparationTime:
 servings: 4
 
 tags:
-  - "healthy"
+  - "Těstoviny"
+  - "Kuřecí"
+  - "Rychlé"
+  - "Odlehčené"
+  - "Hlavní jídlo"
+
 
 image: "/images/pasta_alfredo.jpg"
 

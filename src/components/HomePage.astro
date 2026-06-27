@@ -24,10 +24,17 @@ const languageUrls = {
   en: `${baseUrl}en/`,
 };
 const imageUrl = (path) => `${baseUrl}${path.replace(/^\//, "")}`;
+const normalizeTags = (tags) => [
+  ...new Set(
+    tags
+      .map((tag) => tag.trim().toLocaleLowerCase(language))
+      .filter(Boolean),
+  ),
+];
 const cardOverlap =
   recipes.length <= 3 ? 50 : recipes.length <= 6 ? 100 : 150;
 const availableTags = [
-  ...new Set(recipes.flatMap((recipe) => recipe.data.tags)),
+  ...new Set(recipes.flatMap((recipe) => normalizeTags(recipe.data.tags))),
 ].sort((a, b) => a.localeCompare(b, language));
 ---
 
@@ -105,7 +112,7 @@ const availableTags = [
               class="recipe-card"
               style={`--card-order: ${index}`}
               data-recipe-title={recipe.data.title.toLocaleLowerCase(language)}
-              data-recipe-tags={recipe.data.tags.join("|")}
+              data-recipe-tags={normalizeTags(recipe.data.tags).join("|")}
             >
               <a
                 class="recipe-card-link"
@@ -130,7 +137,7 @@ const availableTags = [
 
                 <ul class="recipe-tags">
                   {
-                    recipe.data.tags.slice(0, 2).map((tag) => (
+                    normalizeTags(recipe.data.tags).slice(0, 2).map((tag) => (
                       <li>{tag}</li>
                     ))
                   }
@@ -177,7 +184,7 @@ const availableTags = [
                 <p class="dialog-recipe-description">{recipe.data.description}</p>
 
                 <ul class="recipe-tags dialog-recipe-tags">
-                  {recipe.data.tags.map((tag) => (
+                  {normalizeTags(recipe.data.tags).map((tag) => (
                     <li>{tag}</li>
                   ))}
                 </ul>
@@ -528,6 +535,12 @@ const availableTags = [
         .toLocaleLowerCase();
     }
 
+    function normalizeTag(value) {
+      return value
+        .trim()
+        .toLocaleLowerCase(document.documentElement.lang || "en");
+    }
+
     function applyFilters() {
       const query =
         recipeSearch instanceof HTMLInputElement
@@ -540,7 +553,10 @@ const availableTags = [
         const title = normalizeSearchText(
           card.getAttribute("data-recipe-title") ?? "",
         );
-        const tags = (card.getAttribute("data-recipe-tags") ?? "").split("|");
+        const tags = (card.getAttribute("data-recipe-tags") ?? "")
+          .split("|")
+          .map(normalizeTag)
+          .filter(Boolean);
         const matchesSearch = title.includes(query);
         const matchesTags = [...activeTags].every((tag) => tags.includes(tag));
         const isVisible = matchesSearch && matchesTags;
@@ -568,7 +584,9 @@ const availableTags = [
 
     filterButtons.forEach((button) => {
       button.addEventListener("click", () => {
-        const tag = button.getAttribute("data-filter-tag") ?? "";
+        const tag = normalizeTag(
+          button.getAttribute("data-filter-tag") ?? "",
+        );
 
         if (!tag) {
           activeTags.clear();
@@ -579,7 +597,9 @@ const availableTags = [
         }
 
         filterButtons.forEach((item) => {
-          const itemTag = item.getAttribute("data-filter-tag") ?? "";
+          const itemTag = normalizeTag(
+            item.getAttribute("data-filter-tag") ?? "",
+          );
           const isActive = itemTag
             ? activeTags.has(itemTag)
             : activeTags.size === 0;

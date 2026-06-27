@@ -1,4 +1,5 @@
 ---
+import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const { language } = Astro.props;
@@ -8,11 +9,50 @@ const languageUrls = {
   en: `${baseUrl}en/editor/`,
 };
 
+const editableRecipes = (await getCollection(
+  "recipes",
+  ({ data }) => data.language === language,
+))
+  .map((recipe) => ({
+    slug: recipe.id.split("/").pop() ?? "",
+    title: recipe.data.title,
+    description: recipe.data.description,
+    language: recipe.data.language,
+    translationKey: recipe.data.translationKey,
+    timeMin: recipe.data.preparationTime.min,
+    timeMax: recipe.data.preparationTime.max ?? "",
+    servings: recipe.data.servings,
+    tags: [
+      ...new Set(
+        recipe.data.tags
+          .map((tag) => tag.trim().toLocaleLowerCase(language))
+          .filter(Boolean),
+      ),
+    ],
+    image: recipe.data.image,
+    ingredients: recipe.data.ingredients,
+    steps: (recipe.body ?? "")
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => /^\d+\.\s+/.test(line))
+      .map((line) => line.replace(/^\d+\.\s+/, "")),
+  }))
+  .sort((a, b) => a.title.localeCompare(b.title, language));
+
+const serializedRecipes = JSON.stringify(editableRecipes).replace(
+  /</g,
+  "\\u003c",
+);
+
 const translations = {
   cs: {
     pageTitle: "Editor receptů | Repertoár receptů",
-    heading: "Nový recept",
-    introduction: "Vyplň údaje, zkontroluj náhled a stáhni hotový soubor pro kuchařku.",
+    heading: "Editor receptů",
+    introduction: "Vytvoř nový recept nebo načti existující, uprav ho a stáhni hotový soubor pro kuchařku.",
+    chooseRecipe: "Nový nebo existující recept",
+    existingRecipe: "Vyber recept k úpravě",
+    newRecipeOption: "Začít nový recept",
+    existingRecipeHelp: "Po výběru se formulář předvyplní. Staženým souborem potom nahraď původní Markdown recept.",
     basic: "Základní údaje",
     language: "Jazyk",
     servings: "Počet porcí",
@@ -29,7 +69,7 @@ const translations = {
     timeMin: "Minimální čas (min)",
     timeMax: "Maximální čas (volitelné)",
     tags: "Tagy oddělené čárkou",
-    tagsPlaceholder: "Snídaně, Sladké",
+    tagsPlaceholder: "snídaně, sladké",
     image: "Cesta k obrázku",
     ingredientsAndMethod: "Suroviny a postup",
     ingredients: "Suroviny – jedna na řádek",
@@ -48,8 +88,12 @@ const translations = {
   },
   en: {
     pageTitle: "Recipe editor | Recipe Repertoire",
-    heading: "New recipe",
-    introduction: "Fill in the details, check the preview, and download the finished cookbook file.",
+    heading: "Recipe editor",
+    introduction: "Create a new recipe or load an existing one, edit it, and download the finished cookbook file.",
+    chooseRecipe: "New or existing recipe",
+    existingRecipe: "Choose a recipe to edit",
+    newRecipeOption: "Start a new recipe",
+    existingRecipeHelp: "Selecting a recipe fills in the form. Replace the original Markdown recipe with the downloaded file afterwards.",
     basic: "Basic information",
     language: "Language",
     servings: "Servings",
@@ -66,7 +110,7 @@ const translations = {
     timeMin: "Minimum time (min)",
     timeMax: "Maximum time (optional)",
     tags: "Comma-separated tags",
-    tagsPlaceholder: "Breakfast, Sweet",
+    tagsPlaceholder: "breakfast, sweet",
     image: "Image path",
     ingredientsAndMethod: "Ingredients and method",
     ingredients: "Ingredients – one per line",
@@ -109,6 +153,30 @@ const text = translations[language];
       data-created-message={text.created}
     >
       <div class="editor-form">
+        <section class="editor-panel">
+          <h2>{text.chooseRecipe}</h2>
+
+          <label>
+            {text.existingRecipe}
+            <select data-existing-recipe>
+              <option value="">{text.newRecipeOption}</option>
+              {
+                editableRecipes.map((recipe) => (
+                  <option value={recipe.slug}>{recipe.title}</option>
+                ))
+              }
+            </select>
+          </label>
+
+          <p class="editor-help">{text.existingRecipeHelp}</p>
+
+          <script
+            type="application/json"
+            data-existing-recipes
+            set:html={serializedRecipes}
+          ></script>
+        </section>
+
         <section class="editor-panel">
           <h2>{text.basic}</h2>
 
@@ -273,11 +341,22 @@ const text = translations[language];
     const confirmMessage = document.querySelector("[data-editor-confirm-message]");
     const cancelButton = document.querySelector("[data-editor-cancel]");
     const downloadButton = document.querySelector("[data-editor-download]");
+    const existingRecipeSelect = form.querySelector("[data-existing-recipe]");
+    const existingRecipesData = form.querySelector("[data-existing-recipes]");
     const fallbackSlug = form.dataset.fallbackSlug || "recipe";
 
     let slugWasEdited = false;
     let translationKeyWasEdited = false;
     let pendingDownload = null;
+    let existingRecipes = [];
+
+    if (existingRecipesData instanceof HTMLScriptElement) {
+      try {
+        existingRecipes = JSON.parse(existingRecipesData.textContent || "[]");
+      } catch {
+        existingRecipes = [];
+      }
+    }
 
     function slugify(value) {
       return value
@@ -300,6 +379,51 @@ const text = translations[language];
         .filter(Boolean);
     }
 
+    function setFieldValue(name, value) {
+      const field = form.elements.namedItem(name);
+
+      if (
+        field instanceof HTMLInputElement ||
+        field instanceof HTMLTextAreaElement ||
+        field instanceof HTMLSelectElement
+      ) {
+        field.value = String(value ?? "");
+      }
+    }
+
+    function clearEditor() {
+      form.reset();
+      slugWasEdited = false;
+      translationKeyWasEdited = false;
+
+      if (existingRecipeSelect instanceof HTMLSelectElement) {
+        existingRecipeSelect.value = "";
+      }
+
+      if (status) status.textContent = "";
+      updatePreview();
+    }
+
+    function loadExistingRecipe(recipe) {
+      setFieldValue("language", recipe.language);
+      setFieldValue("servings", recipe.servings);
+      setFieldValue("title", recipe.title);
+      setFieldValue("description", recipe.description);
+      setFieldValue("slug", recipe.slug);
+      setFieldValue("translationKey", recipe.translationKey);
+      setFieldValue("timeMin", recipe.timeMin);
+      setFieldValue("timeMax", recipe.timeMax);
+      setFieldValue("tags", recipe.tags.join(", "));
+      setFieldValue("image", recipe.image);
+      setFieldValue("ingredients", recipe.ingredients.join("\n"));
+      setFieldValue("steps", recipe.steps.join("\n"));
+
+      slugWasEdited = true;
+      translationKeyWasEdited = true;
+      if (status) status.textContent = "";
+      updatePreview();
+    }
+
     function buildMarkdown() {
       const data = new FormData(form);
       const title = String(data.get("title") ?? "");
@@ -311,11 +435,15 @@ const text = translations[language];
       const timeMin = Number(data.get("timeMin")) || 1;
       const timeMax = Number(data.get("timeMax")) || 0;
       const servings = Number(data.get("servings")) || 1;
-      const image = String(data.get("image") ?? "");
-      const tags = String(data.get("tags") ?? "")
-        .split(/[,\n]/)
-        .map((tag) => tag.trim())
-        .filter(Boolean);
+      const image = String(data.get("image") ?? "").replace(/-/g, "_");
+      const tags = [
+        ...new Set(
+          String(data.get("tags") ?? "")
+            .split(/[,\n]/)
+            .map((tag) => tag.trim().toLocaleLowerCase(language))
+            .filter(Boolean),
+        ),
+      ];
       const ingredients = nonEmptyLines(data.get("ingredients") ?? "");
       const steps = nonEmptyLines(data.get("steps") ?? "");
 
@@ -381,6 +509,21 @@ const text = translations[language];
 
       translationKeyInput.addEventListener("input", () => {
         translationKeyWasEdited = true;
+      });
+    }
+
+    if (existingRecipeSelect instanceof HTMLSelectElement) {
+      existingRecipeSelect.addEventListener("change", () => {
+        if (!existingRecipeSelect.value) {
+          clearEditor();
+          return;
+        }
+
+        const recipe = existingRecipes.find(
+          (item) => item.slug === existingRecipeSelect.value,
+        );
+
+        if (recipe) loadExistingRecipe(recipe);
       });
     }
 

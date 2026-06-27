@@ -44,6 +44,13 @@ for (const translation of translations) {
 
 const { min, max } = recipe.data.preparationTime;
 const displayedTime = max ? `${min}–${max}` : `${min}`;
+const normalizedTags = [
+  ...new Set(
+    recipe.data.tags
+      .map((tag) => tag.trim().toLocaleLowerCase(language))
+      .filter(Boolean),
+  ),
+];
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "Recipe",
@@ -53,7 +60,7 @@ const structuredData = {
   inLanguage: language,
   prepTime: `PT${max ?? min}M`,
   recipeYield: `${recipe.data.servings}`,
-  keywords: recipe.data.tags.join(", "),
+  keywords: normalizedTags.join(", "),
   recipeIngredient: recipe.data.ingredients,
 };
 ---
@@ -85,7 +92,7 @@ const structuredData = {
 
       <div class="recipe-detail-summary">
         <ul class="recipe-tags recipe-detail-tags">
-          {recipe.data.tags.map((tag) => <li>{tag}</li>)}
+          {normalizedTags.map((tag) => <li>{tag}</li>)}
         </ul>
 
         <h1>{recipe.data.title}</h1>

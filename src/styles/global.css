@@ -755,6 +755,12 @@ input {
   color: var(--ink);
   background: #fffefa;
   font: inherit;
+  line-height: 1.5;
+}
+
+.editor-panel input,
+.editor-panel select {
+  min-height: 46px;
 }
 
 .editor-panel textarea {

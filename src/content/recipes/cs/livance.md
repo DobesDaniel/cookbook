@@ -13,10 +13,6 @@ servings: 4
 tags:
   - "Snídaně"
   - "Sladké"
-  - "tage1"
-  - "tage2"
-  - "tage3"
-  - "tage5"
 
 
 image: "/images/livance.png"
