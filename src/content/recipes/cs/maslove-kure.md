@@ -16,7 +16,7 @@ tags:
   - "krémové"
   - "hlavní jídlo"
 
-image: "/images/butter_chicken.jpg"
+image: "/images/butter_chicken.webp"
 
 ingredients:
   - "."

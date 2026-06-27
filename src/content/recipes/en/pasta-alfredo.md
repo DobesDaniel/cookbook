@@ -13,7 +13,7 @@ tags:
   - "Pasta"
   - "Healthy"
 
-image: "/images/pasta_alfredo.jpg"
+image: "/images/pasta_alfredo.webp"
 
 ingredients:
   - "1 cauliflower"

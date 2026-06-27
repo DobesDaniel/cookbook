@@ -16,7 +16,7 @@ tags:
   - "Pečené"
   - "Hlavní jídlo"
 
-image: "/images/prosciutto_wrapped_chicken_with_potato_gratin.jpg"
+image: "/images/prosciutto_wrapped_chicken_with_potato_gratin.webp"
 
 ingredients:
   - "."

@@ -15,7 +15,7 @@ tags:
   - "Healthy"
   - "Easy"
 
-image: "/images/chicken_with_peppers_and_rice.jpg"
+image: "/images/chicken_with_peppers_and_rice.webp"
 
 ingredients:
   - "250 g rice"

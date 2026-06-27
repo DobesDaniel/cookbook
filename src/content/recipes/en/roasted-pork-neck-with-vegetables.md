@@ -15,7 +15,7 @@ tags:
   - "Vegetables"
   - "Oven-baked"
 
-image: "/images/roasted_pork_neck_with_vegetables.jpg"
+image: "/images/roasted_pork_neck_with_vegetables.webp"
 
 ingredients:
   - "."

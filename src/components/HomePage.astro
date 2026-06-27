@@ -24,6 +24,8 @@ const languageUrls = {
   en: `${baseUrl}en/`,
 };
 const imageUrl = (path) => `${baseUrl}${path.replace(/^\//, "")}`;
+const cardImageUrl = (path) =>
+  imageUrl(path.replace(/\.webp$/i, "_card.webp"));
 const normalizeTags = (tags) => [
   ...new Set(
     tags
@@ -121,11 +123,12 @@ const availableTags = [
               >
                 <img
                   class="recipe-card-image"
-                  src={imageUrl(recipe.data.image)}
+                  src={cardImageUrl(recipe.data.image)}
                   alt=""
                   width="600"
                   height="400"
                   loading="lazy"
+                  decoding="async"
                   draggable="false"
                 />
 
@@ -171,6 +174,7 @@ const availableTags = [
                 alt={recipe.data.title}
                 width="900"
                 height="600"
+                decoding="async"
               />
 
               <div class="dialog-recipe-summary">

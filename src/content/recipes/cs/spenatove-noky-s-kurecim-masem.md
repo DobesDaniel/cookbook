@@ -16,7 +16,7 @@ tags:
   - "Špenát"
   - "Hlavní jídlo"
 
-image: "/images/spinach_gnocchi_with_chicken.jpg"
+image: "/images/spinach_gnocchi_with_chicken.webp"
 
 ingredients:
   - "."

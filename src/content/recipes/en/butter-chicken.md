@@ -16,7 +16,7 @@ tags:
   - "Creamy"
   - "Main course"
 
-image: "/images/butter_chicken.jpg"
+image: "/images/butter_chicken.webp"
 
 ingredients:
   - "."

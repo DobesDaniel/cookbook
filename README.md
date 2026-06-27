@@ -33,8 +33,10 @@ npm run dev
 1. Otevři na webu **Přidat recept**.
 2. Vyplň formulář a stáhni vytvořený soubor `.md`.
 3. Český recept vlož do `src/content/recipes/cs/`, anglický do `src/content/recipes/en/`.
-4. Obrázek vlož do `public/images/` a zkontroluj jeho cestu v receptu.
-5. Přeložené verze stejného receptu musí používat stejný `translationKey`.
+4. Původní obrázek ve formátu JPG nebo PNG vlož do `public/images/`.
+5. Spusť `npm run images:optimize`. Vytvoří se WebP obrázek pro detail a menší varianta `_card.webp` pro kartu.
+6. V receptu použij cestu k hlavnímu `.webp` obrázku.
+7. Přeložené verze stejného receptu musí používat stejný `translationKey`.
 
 ## Nasazení
 

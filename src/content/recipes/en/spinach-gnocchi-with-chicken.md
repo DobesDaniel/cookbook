@@ -16,7 +16,7 @@ tags:
   - "Spinach"
   - "Main course"
 
-image: "/images/spinach_gnocchi_with_chicken.jpg"
+image: "/images/spinach_gnocchi_with_chicken.webp"
 
 ingredients:
   - "."

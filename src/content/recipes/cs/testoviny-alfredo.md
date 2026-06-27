@@ -17,7 +17,7 @@ tags:
   - "Hlavní jídlo"
 
 
-image: "/images/pasta_alfredo.jpg"
+image: "/images/pasta_alfredo.webp"
 
 ingredients:
   - "1 květák"

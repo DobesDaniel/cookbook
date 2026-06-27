@@ -18,7 +18,7 @@ tags:
   - "Snadná příprava"
   - "Hlavní jídlo"
 
-image: "/images/chicken_with_peppers_and_rice.jpg"
+image: "/images/chicken_with_peppers_and_rice.webp"
 
 ingredients:
   - "250g rýže"

@@ -13,7 +13,7 @@ tags:
   - "Breakfast"
   - "Sweet"
 
-image: "/images/livance.png"
+image: "/images/livance.webp"
 
 ingredients:
   - "250 g plain flour"

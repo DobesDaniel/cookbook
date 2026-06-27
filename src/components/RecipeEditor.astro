@@ -557,7 +557,9 @@ const text = translations[language];
       const timeMin = Number(data.get("timeMin")) || 1;
       const timeMax = Number(data.get("timeMax")) || 0;
       const servings = Number(data.get("servings")) || 1;
-      const image = String(data.get("image") ?? "").replace(/-/g, "_");
+      const image = String(data.get("image") ?? "")
+        .replace(/-/g, "_")
+        .replace(/\.(?:jpe?g|png)$/i, ".webp");
       const tags = [
         ...new Set(
           String(data.get("tags") ?? "")

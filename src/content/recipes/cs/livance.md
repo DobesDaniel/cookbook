@@ -15,7 +15,7 @@ tags:
   - "Sladké"
 
 
-image: "/images/livance.png"
+image: "/images/livance.webp"
 
 ingredients:
   - "250 g hladké mouky"
