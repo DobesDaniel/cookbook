@@ -52,6 +52,8 @@ const translations = {
     chooseRecipe: "Nový nebo existující recept",
     existingRecipe: "Vyber recept k úpravě",
     newRecipeOption: "Začít nový recept",
+    recipeSearchPlaceholder: "Začni psát název receptu…",
+    noRecipeMatches: "Žádný recept neodpovídá hledání.",
     existingRecipeHelp: "Po výběru se formulář předvyplní. Staženým souborem potom nahraď původní Markdown recept.",
     basic: "Základní údaje",
     language: "Jazyk",
@@ -93,6 +95,8 @@ const translations = {
     chooseRecipe: "New or existing recipe",
     existingRecipe: "Choose a recipe to edit",
     newRecipeOption: "Start a new recipe",
+    recipeSearchPlaceholder: "Start typing a recipe title…",
+    noRecipeMatches: "No recipe matches your search.",
     existingRecipeHelp: "Selecting a recipe fills in the form. Replace the original Markdown recipe with the downloaded file afterwards.",
     basic: "Basic information",
     language: "Language",
@@ -156,9 +160,64 @@ const text = translations[language];
         <section class="editor-panel">
           <h2>{text.chooseRecipe}</h2>
 
-          <label>
-            {text.existingRecipe}
-            <select data-existing-recipe>
+          <div class="editor-recipe-picker">
+            <label for={`existing-recipe-search-${language}`}>
+              {text.existingRecipe}
+            </label>
+
+            <div class="editor-recipe-combobox" data-recipe-combobox>
+              <input
+                id={`existing-recipe-search-${language}`}
+                type="search"
+                placeholder={text.recipeSearchPlaceholder}
+                autocomplete="off"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded="false"
+                aria-controls={`existing-recipe-options-${language}`}
+                data-existing-recipe-search
+              />
+
+              <div
+                id={`existing-recipe-options-${language}`}
+                class="editor-recipe-options"
+                role="listbox"
+                data-existing-recipe-options
+                hidden
+              >
+                <button
+                  class="editor-recipe-option editor-recipe-new"
+                  type="button"
+                  role="option"
+                  data-recipe-option
+                  data-recipe-slug=""
+                  data-recipe-title={text.newRecipeOption}
+                >
+                  {text.newRecipeOption}
+                </button>
+
+                {
+                  editableRecipes.map((recipe) => (
+                    <button
+                      class="editor-recipe-option"
+                      type="button"
+                      role="option"
+                      data-recipe-option
+                      data-recipe-slug={recipe.slug}
+                      data-recipe-title={recipe.title}
+                    >
+                      {recipe.title}
+                    </button>
+                  ))
+                }
+
+                <p class="editor-recipe-empty" data-recipe-empty hidden>
+                  {text.noRecipeMatches}
+                </p>
+              </div>
+            </div>
+
+            <select data-existing-recipe hidden aria-hidden="true" tabindex="-1">
               <option value="">{text.newRecipeOption}</option>
               {
                 editableRecipes.map((recipe) => (
@@ -166,7 +225,7 @@ const text = translations[language];
                 ))
               }
             </select>
-          </label>
+          </div>
 
           <p class="editor-help">{text.existingRecipeHelp}</p>
 
@@ -343,6 +402,13 @@ const text = translations[language];
     const downloadButton = document.querySelector("[data-editor-download]");
     const existingRecipeSelect = form.querySelector("[data-existing-recipe]");
     const existingRecipesData = form.querySelector("[data-existing-recipes]");
+    const recipeCombobox = form.querySelector("[data-recipe-combobox]");
+    const recipeSearchInput = form.querySelector("[data-existing-recipe-search]");
+    const recipeOptions = form.querySelector("[data-existing-recipe-options]");
+    const recipeEmpty = form.querySelector("[data-recipe-empty]");
+    const recipeOptionButtons = [
+      ...form.querySelectorAll("[data-recipe-option]"),
+    ];
     const fallbackSlug = form.dataset.fallbackSlug || "recipe";
 
     let slugWasEdited = false;
@@ -379,6 +445,53 @@ const text = translations[language];
         .filter(Boolean);
     }
 
+    function normalizeRecipeSearch(value) {
+      return String(value)
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .toLocaleLowerCase();
+    }
+
+    function openRecipeOptions() {
+      if (
+        recipeOptions instanceof HTMLElement &&
+        recipeSearchInput instanceof HTMLInputElement
+      ) {
+        recipeOptions.hidden = false;
+        recipeSearchInput.setAttribute("aria-expanded", "true");
+      }
+    }
+
+    function closeRecipeOptions() {
+      if (
+        recipeOptions instanceof HTMLElement &&
+        recipeSearchInput instanceof HTMLInputElement
+      ) {
+        recipeOptions.hidden = true;
+        recipeSearchInput.setAttribute("aria-expanded", "false");
+      }
+    }
+
+    function filterRecipeOptions(query) {
+      const normalizedQuery = normalizeRecipeSearch(query);
+      let matchingRecipes = 0;
+
+      recipeOptionButtons.forEach((button) => {
+        const slug = button.getAttribute("data-recipe-slug") ?? "";
+        const title = button.getAttribute("data-recipe-title") ?? "";
+        const matches = slug
+          ? normalizeRecipeSearch(title).includes(normalizedQuery)
+          : normalizedQuery.length === 0;
+
+        button.hidden = !matches;
+        if (slug && matches) matchingRecipes += 1;
+      });
+
+      if (recipeEmpty instanceof HTMLElement) {
+        recipeEmpty.hidden = matchingRecipes !== 0 || normalizedQuery.length === 0;
+      }
+    }
+
     function setFieldValue(name, value) {
       const field = form.elements.namedItem(name);
 
@@ -400,6 +513,11 @@ const text = translations[language];
         existingRecipeSelect.value = "";
       }
 
+      if (recipeSearchInput instanceof HTMLInputElement) {
+        recipeSearchInput.value = "";
+      }
+
+      filterRecipeOptions("");
       if (status) status.textContent = "";
       updatePreview();
     }
@@ -417,6 +535,10 @@ const text = translations[language];
       setFieldValue("image", recipe.image);
       setFieldValue("ingredients", recipe.ingredients.join("\n"));
       setFieldValue("steps", recipe.steps.join("\n"));
+
+      if (recipeSearchInput instanceof HTMLInputElement) {
+        recipeSearchInput.value = recipe.title;
+      }
 
       slugWasEdited = true;
       translationKeyWasEdited = true;
@@ -524,6 +646,83 @@ const text = translations[language];
         );
 
         if (recipe) loadExistingRecipe(recipe);
+      });
+    }
+
+    if (
+      recipeCombobox instanceof HTMLElement &&
+      recipeSearchInput instanceof HTMLInputElement &&
+      recipeOptions instanceof HTMLElement
+    ) {
+      recipeSearchInput.addEventListener("focus", () => {
+        recipeSearchInput.select();
+        filterRecipeOptions("");
+        openRecipeOptions();
+      });
+
+      recipeSearchInput.addEventListener("input", () => {
+        filterRecipeOptions(recipeSearchInput.value);
+        openRecipeOptions();
+      });
+
+      recipeSearchInput.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeRecipeOptions();
+          recipeSearchInput.blur();
+        }
+
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          const firstVisibleOption = recipeOptionButtons.find(
+            (button) => !button.hidden,
+          );
+          firstVisibleOption?.focus();
+        }
+      });
+
+      recipeOptionButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const slug = button.getAttribute("data-recipe-slug") ?? "";
+
+          if (existingRecipeSelect instanceof HTMLSelectElement) {
+            existingRecipeSelect.value = slug;
+            existingRecipeSelect.dispatchEvent(
+              new Event("change", { bubbles: true }),
+            );
+          }
+
+          closeRecipeOptions();
+        });
+      });
+
+      recipeOptions.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeRecipeOptions();
+          recipeSearchInput.focus();
+        }
+
+        if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+
+        event.preventDefault();
+        const visibleOptions = recipeOptionButtons.filter(
+          (button) => !button.hidden,
+        );
+        const currentIndex = visibleOptions.indexOf(document.activeElement);
+        const direction = event.key === "ArrowDown" ? 1 : -1;
+        const nextIndex =
+          (currentIndex + direction + visibleOptions.length) %
+          visibleOptions.length;
+
+        visibleOptions[nextIndex]?.focus();
+      });
+
+      document.addEventListener("pointerdown", (event) => {
+        if (
+          event.target instanceof Node &&
+          !recipeCombobox.contains(event.target)
+        ) {
+          closeRecipeOptions();
+        }
       });
     }
 

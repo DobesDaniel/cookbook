@@ -739,6 +739,67 @@ input {
   font-weight: bold;
 }
 
+.editor-recipe-picker {
+  margin-top: 18px;
+}
+
+.editor-recipe-picker > label {
+  display: block;
+  margin: 0 0 7px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.editor-recipe-combobox {
+  position: relative;
+}
+
+.editor-recipe-options {
+  position: absolute;
+  z-index: 120;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  max-height: 264px;
+  padding: 6px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  box-shadow: 0 16px 40px rgb(25 28 23 / 18%);
+}
+
+.editor-recipe-option {
+  display: block;
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 0;
+  border-radius: 7px;
+  color: var(--ink);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.editor-recipe-option:hover,
+.editor-recipe-option:focus-visible {
+  outline: none;
+  background: var(--cream);
+}
+
+.editor-recipe-new {
+  color: var(--green);
+  font-weight: bold;
+}
+
+.editor-recipe-empty {
+  margin: 0;
+  padding: 12px 11px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .editor-fields-two {
   display: grid;
   grid-template-columns: 1fr 1fr;
